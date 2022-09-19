@@ -1,0 +1,45 @@
+name: BuildDeployWeb_$(Date:yyyyMMdd)$(Rev:.r)
+trigger:
+- main
+stages:
+- stage: Build
+  jobs:
+  - job: Build
+    pool:
+     name: Default
+    workspace:
+     clean: outputs 
+    steps:
+    - task: VSBuild@1
+      inputs:
+        solution: '**\*.sln'
+        msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:PackageLocation="$(build.artifactstagingdirectory)\\"'
+        platform: 'any cpu'
+        configuration: 'release'
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        ArtifactName: 'drop'
+        publishLocation: 'Container'
+- stage: Deploy
+  jobs:
+  - job: DeployWeb
+    pool:
+      name: Default
+    steps:
+    - powershell: "write-host"
+    - task: DownloadBuildArtifacts@1
+      inputs:
+        buildType: 'specific'
+        project: '0a1af395-65ea-473b-b60e-01fdc0d3f93e'
+        pipeline: '11'
+        buildVersionToDownload: 'latest'
+        downloadType: 'single'
+        downloadPath: '$(System.ArtifactsDirectory)'
+    - task: AzureRmWebAppDeployment@4
+      inputs:
+        ConnectionType: 'AzureRM'
+        azureSubscription: 'testconn'
+        appType: 'webApp'
+        WebAppName: 'demotest0103'
+        packageForLinux: '$(System.ArtifactsDirectory)/**/*.zip'

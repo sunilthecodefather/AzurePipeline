@@ -1,0 +1,15 @@
+#Single Stage, Single Job YAML Pipeline
+name: createAzureWeb_$(Date:yyyyMMdd)$(Rev:.r)
+trigger:
+- main
+pool:
+ name:Default
+Steps:
+-task VSBuild@1
+ inputs:
+  solution: '**\*.sln'
+  msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package 
+ /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:PackageLocation="$(build.artifactstagingdirectory)\\"'
+  platform: 'any cpu'
+  configuration:'release'
+

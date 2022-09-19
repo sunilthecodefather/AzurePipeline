@@ -1,0 +1,11 @@
+variables:
+  solution: '**/*.sln'
+  buildPlatform: 'Any CPU'
+  buildConfiguration: 'Release'
+  UserName: 'Sunil Bharti'
+  configuration: debug
+  platform: x64
+- task: PowerShell@2
+  inputs:
+    targetType: 'inline'
+    script: 'Write-Host "Hello " $(UserName)'
